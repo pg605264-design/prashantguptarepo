@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Modern Login — Final</title>
+  <style>
+    :root{
+      /* color & spacing tokens */
+      --bg-900: #081026; --bg-800: #0f1724;
+      --accent-a: #7c5cff; --accent-b: #00d4ff;
+      --muted: rgba(255,255,255,0.66);
+
+      /* typography (centralized) */
+      --font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      --base-size: 16px; /* change this to scale whole UI */
+      --h1: 1.375rem; /* ~22px */
+      --lead: 0.8125rem; /* ~13px */
+      --input-size: 0.9375rem; /* ~15px */
+      --label-size: 0.8125rem; /* ~13px */
+
+      /* radii & motion */
+      --radius: 14px; --card-width: 420px;
+      --motion-fast: 180ms cubic-bezier(.2,.9,.3,1);
+      --motion-medium: 320ms cubic-bezier(.2,.9,.3,1);
+
+      font-family: var(--font-family);
+      font-size: var(--base-size);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      background: radial-gradient(800px 420px at 10% 10%, rgba(124,92,255,0.10), transparent 8%),
+                  radial-gradient(640px 360px at 90% 90%, rgba(0,212,255,0.05), transparent 12%),
+                  linear-gradient(180deg,var(--bg-900),var(--bg-800));
+      display:grid;place-items:center;padding:28px;color:#eaf2ff;font-size:var(--base-size);
+    }
+
+    /* card */
+    .card{
+      width:var(--card-width);max-width:100%;border-radius:calc(var(--radius) + 4px);
+      padding:28px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter: blur(8px) saturate(120%);
+      position:relative;overflow:hidden;transform-style:preserve-3d;transition:transform var(--motion-medium), box-shadow var(--motion-medium);
+    }
+
+    /* subtle 3D tilt on hover/focus */
+    .card:hover, .card:focus-within{transform:perspective(900px) translateY(-8px) rotateX(3.6deg)}
+
+    .card::before, .card::after{content:"";position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;opacity:0.6;transition:transform 700ms ease}
+    .card::before{width:420px;height:420px;left:-120px;top:-120px;background:radial-gradient(circle at 30% 30%, var(--accent-a), transparent 36%)}
+    .card::after{width:360px;height:360px;right:-120px;bottom:-120px;background:radial-gradient(circle at 70% 70%, var(--accent-b), transparent 34%)}
+
+    header{margin-bottom:12px}
+    h1{font-size:var(--h1);margin:0}
+    p.lead{margin:6px 0 16px;color:var(--muted);font-size:var(--lead)}
+
+    form{display:grid;gap:12px}
+
+    /* Input fields (clean sizing using variables) */
+    .field{position:relative;height:56px}
+    input[type="text"], input[type="email"], input[type="password"]{
+      width:100%;height:100%;padding:18px 46px 12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:inherit;font-size:var(--input-size);outline:none;
+      transition:box-shadow var(--motion-fast), border-color var(--motion-fast), transform var(--motion-fast);transform-origin:left center;backface-visibility:hidden;
+    }
+
+    .label{
+      position:absolute;left:14px;top:18px;font-size:var(--label-size);color:var(--muted);pointer-events:none;transition:transform var(--motion-fast), top var(--motion-fast), color var(--motion-fast), font-size var(--motion-fast);transform-origin:left center;
+    }
+
+    /* active (focused or filled) */
+    .field.active .label{transform:translateY(-10px) scale(0.94);top:8px;color:var(--accent-a);font-size:0.75rem}
+    .field.active input{box-shadow:0 8px 22px rgba(124,92,255,0.12);border-color:rgba(124,92,255,0.6);transform:translateY(-2px)}
+
+    /* icons */
+    .icon{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform 160ms ease, background 160ms}
+    .icon:active{transform:scale(0.96)}
+
+    /* row */
+    .row{display:flex;justify-content:space-between;align-items:center;font-size:var(--lead);color:var(--muted)}
+    .row a{color:var(--muted);text-decoration:none;border-radius:8px;padding:6px}
+
+    /* primary button */
+    .btn{
+      width:100%;padding:14px;border-radius:12px;border:0;font-weight:700;font-size:var(--input-size);cursor:pointer;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:#051225;box-shadow:0 10px 28px rgba(0,0,0,0.45), 0 2px 0 rgba(255,255,255,0.02) inset;transition:transform var(--motion-medium), box-shadow var(--motion-medium);transform-origin:center
+    }
+    .btn:hover{transform:translateY(-5px) scale(1.01);box-shadow:0 20px 44px rgba(0,0,0,0.6)}
+
+    .helper{font-size:var(--lead);color:var(--muted);text-align:center;margin-top:10px}
+
+    .msg{font-size:var(--lead);padding:8px;border-radius:10px}
+    .msg.err{background:rgba(255,107,107,0.08);color:#ff6b6b}
+    .msg.ok{background:rgba(46,204,113,0.06);color:#2ecc71}
+
+    @media (max-width:420px){.card{padding:20px}}
+  </style>
+</head>
+<body>
+  <main class="card" id="card" aria-labelledby="signinTitle">
+    <header>
+      <h1 id="signinTitle">Welcome back</h1>
+      <p class="lead">Sign in to continue</p>
+    </header>
+
+    <form id="loginForm" novalidate>
+
+      <div class="field" data-field>
+        <input id="email" name="email" type="email" autocomplete="username" required placeholder=" ">
+        <label for="email" class="label">Email address</label>
+        <div class="icon" aria-hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7.5v9A2.5 2.5 0 0 0 5.5 19h13A2.5 2.5 0 0 0 21 16.5v-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 7.5L12 13 3 7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="field" data-field>
+        <input id="password" name="password" type="password" autocomplete="current-password" minlength="6" required placeholder=" ">
+        <label for="password" class="label">Password</label>
+        <button type="button" class="icon" id="togglePwd" aria-pressed="false" aria-label="Show password">
+          <svg id="eyeOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+          <svg id="eyeClosed" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden style="display:none">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6 0-10-7-10-7a19.77 19.77 0 0 1 5.11-4.43" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 1l22 22" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="row">
+        <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="remember"> Remember me</label>
+        <a href="#" aria-label="Forgot password">Forgot?</a>
+      </div>
+
+      <div>
+        <button class="btn" type="submit">Sign in</button>
+      </div>
+
+      <div id="msg" aria-live="polite"></div>
+    </form>
+
+    <p class="helper">Or continue with <button class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:8px 12px;border-radius:10px;margin-left:6px">Google</button></p>
+  </main>
+
+  <script>
+    (function(){
+      const fields = document.querySelectorAll('[data-field]');
+      fields.forEach(container => {
+        const input = container.querySelector('input');
+        const setActive = () => { if(input.value) container.classList.add('active'); else container.classList.remove('active'); };
+        input.addEventListener('input', setActive);
+        input.addEventListener('focus', () => container.classList.add('active'));
+        input.addEventListener('blur', setActive);
+        setActive();
+      });
+
+      const pwd = document.getElementById('password');
+      const toggle = document.getElementById('togglePwd');
+      const eyeOpen = document.getElementById('eyeOpen');
+      const eyeClosed = document.getElementById('eyeClosed');
+      toggle.addEventListener('click', () => {
+        const isPwd = pwd.type === 'password';
+        pwd.type = isPwd ? 'text' : 'password';
+        toggle.setAttribute('aria-pressed', String(isPwd));
+        toggle.setAttribute('aria-label', isPwd ? 'Hide password' : 'Show password');
+        eyeOpen.style.display = isPwd ? 'none' : 'block';
+        eyeClosed.style.display = isPwd ? 'block' : 'none';
+      });
+
+      const form = document.getElementById('loginForm');
+      const msg = document.getElementById('msg');
+      const card = document.getElementById('card');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault(); msg.textContent=''; msg.className='';
+        const email = form.email.value.trim();
+        const password = form.password.value;
+        if(!email || !password){ showError('Please enter both email and password.'); shake(); return; }
+        if(!/^\S+@\S+\.\S+$/.test(email)){ showError('Enter a valid email address.'); shake(); return; }
+        if(password.length < 6){ showError('Password must be at least 6 characters.'); shake(); return; }
+        if(password === 'password123'){ showSuccess('Signed in — redirecting...'); card.style.transition = 'transform 600ms ease, opacity 500ms ease'; card.style.transform = 'perspective(900px) translateY(-18px) rotateX(6deg) scale(0.98)'; setTimeout(()=>{ card.style.opacity = '0.03'; },700); }
+        else { showError('Invalid credentials.'); shake(); }
+      });
+
+      function showError(t){ msg.textContent = t; msg.className = 'msg err'; }
+      function showSuccess(t){ msg.textContent = t; msg.className = 'msg ok'; }
+      function shake(){ card.animate([{transform:'translateX(0)'},{transform:'translateX(-8px) rotateZ(-1deg)'},{transform:'translateX(8px) rotateZ(1deg)'},{transform:'translateX(-6px) rotateZ(-0.6deg)'},{transform:'translateX(6px) rotateZ(0.6deg)'},{transform:'translateX(0)'}],{duration:420,easing:'cubic-bezier(.2,.9,.3,1)'}); }
+    })();
+  </script>
+</body>
+</html>
